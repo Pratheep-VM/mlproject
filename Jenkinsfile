@@ -13,7 +13,7 @@ pipeline {
             steps {
                 script {
                     // Use credentials to log in
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-login', 
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', 
                                                      passwordVariable: 'DOCKER_PWD', 
                                                      usernameVariable: 'DOCKER_USER')]) {
                         
