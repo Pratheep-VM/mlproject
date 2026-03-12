@@ -16,7 +16,7 @@ pipeline {
                                                      passwordVariable: 'DOCKER_PWD', 
                                                      usernameVariable: 'DOCKER_USER')]) {
                         
-                        // 1. Force a clean login
+                        // Force a clean login.
                         sh "echo $DOCKER_PWD | docker login -u $DOCKER_USER --password-stdin"
                         
                 
