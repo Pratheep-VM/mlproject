@@ -12,11 +12,26 @@ pipeline {
         stage('Build & Push') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-login') {
-                        // Build the image
-                        def customImage = docker.build("${DOCKER_IMAGE_NAME}:${env.BUILD_ID}")
-                        // Push to Docker Hub
-                        customImage.push('latest')
+                    // Use credentials to log in
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-login', 
+                                                     passwordVariable: 'DOCKER_PWD', 
+                                                     usernameVariable: 'DOCKER_USER')]) {
+                        
+                        // Log in
+                        sh "echo $DOCKER_PWD | docker login -u $DOCKER_USER --password-stdin"
+                        
+                        // Build
+                        sh "docker build -t your-docker-username/ml-app:${env.BUILD_ID} ."
+                        
+                        // Push
+                        sh "docker push your-docker-username/ml-app:${env.BUILD_ID}"
+                        
+                        //  Tag as latest
+                        sh "docker tag your-docker-username/ml-app:${env.BUILD_ID} your-docker-username/ml-app:latest"
+                        sh "docker push your-docker-username/ml-app:latest"
+                        
+                        // Logout
+                        sh "docker logout"
                     }
                 }
             }
