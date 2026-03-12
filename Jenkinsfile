@@ -12,25 +12,22 @@ pipeline {
         stage('Build & Push') {
             steps {
                 script {
-                    // Use credentials to log in
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', 
                                                      passwordVariable: 'DOCKER_PWD', 
                                                      usernameVariable: 'DOCKER_USER')]) {
                         
-                        // Log in
+                        // 1. Force a clean login
                         sh "echo $DOCKER_PWD | docker login -u $DOCKER_USER --password-stdin"
                         
-                        // Build
-                        sh "docker build -t your-docker-username/ml-app:${env.BUILD_ID} ."
+                
+                        def IMAGE_TAG = "piratheepv20/ml-app:${env.BUILD_ID}"
                         
-                        // Push
-                        sh "docker push your-docker-username/ml-app:${env.BUILD_ID}"
+            
+                        sh "docker build -t ${IMAGE_TAG} ."
                         
-                        //  Tag as latest
-                        sh "docker tag your-docker-username/ml-app:${env.BUILD_ID} your-docker-username/ml-app:latest"
-                        sh "docker push your-docker-username/ml-app:latest"
+                
+                        sh "docker push ${IMAGE_TAG}"
                         
-                        // Logout
                         sh "docker logout"
                     }
                 }
