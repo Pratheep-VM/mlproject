@@ -1,25 +1,22 @@
 pipeline {
     agent any
-    
+    environment {
+        DOCKER_IMAGE_NAME = 'piratheepv20/ml-app' 
+    }
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
         stage('Build & Push') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', 
-                                                     passwordVariable: 'DOCKER_PWD', 
-                                                     usernameVariable: 'DOCKER_USER')]) {
-                        
-                        // Log in to Docker Hub
-                        sh "echo $DOCKER_PWD | docker login -u $DOCKER_USER --password-stdin"
-                        
-                        // Build your image
-                        sh "docker build -t your-dockerhub-username/your-app-name:latest ."
-                        
-                        // Push your image
-                        sh "docker push your-dockerhub-username/your-app-name:latest"
-                        
-                        // Logout 
-                        sh "docker logout"
+                    docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-login') {
+                        // Build the image
+                        def customImage = docker.build("${DOCKER_IMAGE_NAME}:${env.BUILD_ID}")
+                        // Push to Docker Hub
+                        customImage.push('latest')
                     }
                 }
             }
